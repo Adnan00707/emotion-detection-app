@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Emotion Detection</h1>
+        <form id="emotion-form">
+            <textarea name="text" id="text-input" rows="4" placeholder="Type your sentence here..." required></textarea>
+            <button type="submit">Detect Emotion</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("emotion-form");
+        const resultDiv = document.getElementById("result");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            resultDiv.innerHTML = "Detecting...";
+            const response = await fetch("/predict", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (data.error) {
+                resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+            } else {
+                resultDiv.innerHTML = "<h2>Top Emotions:</h2><ul>" +
+                    data.map(item =>
+                        `<li><strong>${item.emotion}</strong> - ${item.confidence * 100}%</li>`
+                    ).join("") +
+                    "</ul>";
+            }
+        });
+    </script>
+</body>
+</html>
